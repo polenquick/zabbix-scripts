@@ -1,0 +1,29 @@
+lsb_release -a
+zabbix_server -V
+systemctl stop zabbix-server
+mkdir backup
+cp /etc/zabbix/zabbix_server.conf /root/backup/
+cp /etc/zabbix/zabbix_agentd.conf /root/backup/
+cp /etc/zabbix/web/zabbix.conf.php /root/backup/
+mysqldump -u root -p zabbix > /root/backup/zabbix.sql
+
+wget https://repo.zabbix.com/zabbix/7.0/debian/pool/main/z/zabbix-release/zabbix-release_7.0-1+debian12_all.deb
+dpkg -i zabbix-release_7.0-1+debian12_all.deb
+apt update
+
+
+apt install -- only-upgrade zabbix-server-mysql zabbix-frontend-php zabbix-agent
+apt install --only-upgrade zabbix-server-mysql zabbix-frontend-php zabbix-agent
+systemctl restart zabbix-agent.service
+tail -f /var/log/zabbix/zabbix_server.log
+cp /root/backup/zabbix_server.conf /etc/zabbix/
+cp /root/backup/zabbix_agentd.conf /etc/zabbix/
+cp /root/backup/zabbix.conf.php /etc/zabbix/web/
+systemctl restart zabbix-server.service zabbix-agent.service
+systemctl enable zabbix-server.service zabbix-agent.service
+tail -f /var/log/zabbix/zabbix_server.log
+mysql -uroot -p
+
+set global log_bin_trust_function_creators = 1;
+
+set global log_bin_trust_function_creators = 0;
